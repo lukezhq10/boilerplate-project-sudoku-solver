@@ -19,15 +19,15 @@ module.exports = function (app) {
   };
 
   app.route('/api/check')
-    // posts an object containing puzzle, coordinate, value
     // coordinate is A-I indicating row and 1-9 indicating column
-    // checks if the value can be placed at the coordinate given based on the puzzle
+    // checks if the value can be placed at the coordinate based on the puzzle
     .post((req, res) => {
       let { puzzle, coordinate, value } = req.body;
-      if (!puzzle || !coordinate || !value) {
+      // value == undefined to account for value = 0
+      if (!puzzle || !coordinate || value == undefined) {
         return res.json({
           error: 'Required field(s) missing'
-        })
+        });
       }
 
       if (!solver.validate(puzzle) && (/[^1-9.]/.test(puzzle))) {
@@ -54,48 +54,43 @@ module.exports = function (app) {
         })
       }
 
-      // given puzzle, coordinate, value, run solver check funcs
+      // given puzzle, coordinate, value, run solver checkPlacement funcs
       // if all true, return result obj with valid property = true
-      // if there's an issue, return result obj with valid property = false and conflict property = row, column and/or region dep on which check funcs fail
+      // if there's an issue, return result obj with valid property = false and conflict property dep on which check funcs fail
       let row = rows[coordinate[0]];
       let col = parseInt(coordinate[1]) - 1;
       let result = {
         valid: false,
         conflict: []
       };
-
-      // if value is already at the coordinate given
-      if (!solver.checkRowPlacement(puzzle, row, value) &&
-          !solver.checkColPlacement(puzzle, col, value) &&
-          !solver.checkRegionPlacement(puzzle, row, col, value)) {
-            result.valid = true;
-          };
-
+      let rowCheck = solver.checkRowPlacement(puzzle, row, value);
+      let colCheck = solver.checkColPlacement(puzzle, col, value);
+      let regCheck = solver.checkRegionPlacement(puzzle, row, col, value);
+      
       // check for conflicts
-      if (!solver.checkRowPlacement(puzzle, row, value)) {
+      if (!rowCheck) {
         result.conflict.push('row');
       }
-      if (!solver.checkColPlacement(puzzle, col, value)) {
+      if (!colCheck) {
         result.conflict.push('column');
       }
-      if (!solver.checkRegionPlacement(puzzle, row, col, value)) {
+      if (!regCheck) {
         result.conflict.push('region');
       }
-      
-      // if value can be placed at the coordinate given
-      if (solver.checkRowPlacement(puzzle, row, value) &&
-          solver.checkColPlacement(puzzle, col, value) &&
-          solver.checkRegionPlacement(puzzle, row, col, value)) {
-            result.valid = true;
-          }
-      
-      if (result.valid) {
-        return res.json({
-          valid: true
-        })
-      } else {
-        return res.json(result)
+
+      if (result.conflict.length == 0) {
+        result.valid = true;
+        delete result.conflict;
       }
+
+      // check if value already exists on coordinate
+      let index = (row) * 9 + col;
+      if (!rowCheck && !colCheck && !regCheck && puzzle[index] == value) {
+          result.valid = true;
+        }
+      
+      return res.json(result);
+    
     });
     
   app.route('/api/solve')

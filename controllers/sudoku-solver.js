@@ -17,8 +17,7 @@ class SudokuSolver {
     return true;
   }
 
-  // check if value is already in the row\
-  // takes in puzzleString as an array
+  // check if value is already in the row
   checkRowPlacement(puzzle, row, value) {
     for (let col = 0; col < 9; col++) {
       if (puzzle[row * 9 + col] == value) {
@@ -54,6 +53,11 @@ class SudokuSolver {
     }
 
     return true;
+  }
+
+  // gets the index of a puzzleString based on row and col indexes
+  getIndex(row, col) {
+    return (row - 1) * 9 + (col - 1);
   }
 
 
@@ -108,7 +112,7 @@ class SudokuSolver {
     // convert puzzle array back to a string and return it
     let solution = puzzle.join('');
     if (solution === puzzleString) {
-      console.log('puzzle cannot be solved')
+      console.log('puzzle cannot be solved');
       return false;
     } else {
       return solution;
