@@ -103,10 +103,16 @@ class SudokuSolver {
     }
 
     // call recursive solver starting at index 0
-    solveRecursive(0);
-
+    solveRecursive(0)
+    
     // convert puzzle array back to a string and return it
-    return puzzle.join('');
+    let solution = puzzle.join('');
+    if (solution === puzzleString) {
+      console.log('puzzle cannot be solved')
+      return false;
+    } else {
+      return solution;
+    }
   }
 }
 

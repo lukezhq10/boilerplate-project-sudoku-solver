@@ -69,7 +69,9 @@ suite('Unit Tests', () => {
     // Invalid puzzle strings fail the solver
     test('invalid puzzle string fails solver', () => {
         let input = '1.a..2.84..63.12.7.b..5.....9..1....8.2.367@.3.7.2..9.47...8..1..-6....926914.37.';
+        let input2 = '9.9..5.1.85.4....2432......1...69.83.9.....6.62.71...9......1945....4.37.4.3..6..';
         assert.equal(solver.solve(input), false);
+        assert.equal(solver.solve(input2), false);
     });
 
     // Solver returns the expected solution for an incomplete puzzle
