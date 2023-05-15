@@ -17,10 +17,11 @@ class SudokuSolver {
     return true;
   }
 
-  // check if value is already in the row
-  checkRowPlacement(puzzleString, row, value) {
-    for (let i = 0; i < 9; i++) {
-      if (puzzleString[row * 9 + i] === value) {
+  // check if value is already in the row\
+  // takes in puzzleString as an array
+  checkRowPlacement(puzzle, row, value) {
+    for (let col = 0; col < 9; col++) {
+      if (puzzle[row * 9 + col] == value) {
         console.log('invalid row placement');
         return false;
       }
@@ -29,18 +30,16 @@ class SudokuSolver {
     return true;
   }
 
-  checkColPlacement(puzzleString, col, value) {
-    for (let i = 0; i < 9; i++) {
-      if (puzzleString[col + i * 9] === value) {
-        console.log('invalid column placement');
+  checkColPlacement(puzzle, col, value) {
+    for (let row = 0; row < 9; row++) {
+      if (puzzle[row * 9 + col] == value) {
         return false;
       }
     }
-
     return true;
   }
 
-  checkRegionPlacement(puzzleString, row, col, value) {
+  checkRegionPlacement(puzzle, row, col, value) {
     // calculate top-left row and column of the 3x3 box
     const boxRow = Math.floor(row / 3) * 3;
     const boxCol = Math.floor(col / 3) * 3;
@@ -48,7 +47,7 @@ class SudokuSolver {
     // check if value is already in 3x3 box
     for (let i = boxRow; i < boxRow + 3; i++) {
       for (let j = boxCol; j < boxCol + 3; j++) {
-        if (puzzleString[i * 9 + j] === value) {
+        if (puzzle[i * 9 + j] == value) {
           return false;
         }
       }
@@ -57,28 +56,39 @@ class SudokuSolver {
     return true;
   }
 
-  solve(puzzleString) {
-    // convert puzzleString to an array for easier manipulation
-    const puzzle = pzuzleString.split('');
 
-    // define a recursive function to solve the puzzle
+  solve(puzzleString) {
+    
+    // check if valid puzzle string
+    if (!this.validate(puzzleString)) {
+      console.log('invalid puzzle string sent to solver');
+      return false;
+    }
+
+    // convert puzzleString to an array for easier manipulation
+    const puzzle = puzzleString.split('');
+
     function solveRecursive(index) {
+      let solver = new SudokuSolver();
+
       // if all cells are solved, return true
-      if (index >= 81) {
+      if (index > 81) {
         return true;
       }
-
+  
       // if current cell is not empty, move on to next cell
       if (puzzle[index] !== '.') {
         return solveRecursive(index + 1);
       }
-
+  
       // try each possible value for the current cell
       for (let value = 1; value <= 9; value++) {
+        let row = Math.floor(index / 9);
+        let col = index % 9;
         // check if current value is valid for this cell
-        if (this.checkRowPlacement(puzzleString, Math.floor(index / 9), value) &&
-            this.checkColPlacement(puzzleString, index % 9, value) &&
-            this.checkRegionPlacement(puzzleString, Math.floor(index / 9), index % 9, value)) {
+        if (solver.checkRowPlacement(puzzle, row, value) &&
+            solver.checkColPlacement(puzzle, col, value) &&
+            solver.checkRegionPlacement(puzzle, row, col, value)) {
           // if current value is valid, set it and move on to next cell
           puzzle[index] = value;
           if (solveRecursive(index + 1)) {
@@ -86,7 +96,7 @@ class SudokuSolver {
           }
         }
       }
-
+  
       // if no values are valid for this cell, backtrack to previous cell
       puzzle[index] = '.';
       return false;
