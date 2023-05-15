@@ -55,12 +55,6 @@ class SudokuSolver {
     return true;
   }
 
-  // gets the index of a puzzleString based on row and col indexes
-  getIndex(row, col) {
-    return (row - 1) * 9 + (col - 1);
-  }
-
-
   solve(puzzleString) {
     
     // check if valid puzzle string
